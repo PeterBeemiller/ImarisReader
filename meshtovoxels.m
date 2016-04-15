@@ -3,24 +3,38 @@ function mask = meshtovoxels(varargin)
     %
     %   Syntax
     %   ------
-    %   mask = meshvolume('f', F, 'v', V, 'x', X, 'y', Y, 'z', Z)
+    %   mask = meshtovoxels('Faces', F, 'Vertices', V, 'XGridVector', X, 'YGridVector', Y, 'ZGridVector', Z)
+    %   mask = meshtovoxels('f', F, 'v', V, 'x', X, 'y', Y, 'z', Z)
     %
     %   Description
     %   -----------
-    %   mask = meshvolume('f', F, 'v', V, 'x', X, 'y', Y, 'z', Z) generates
-    %   a boolean mask from the mesh represented by faces F and vertices V
-    %   using the grid vectors X, Y and Z. The faces input F is an mx3 or
-    %   3xm array that specifies the vertices to connect in the vertices
-    %   array V. X, Y and Z represent the grid vectors to use to create the
-    %   meshgrid for voxel creation.
+    %   mask = meshtovoxels('f', F, 'v', V, 'x', X, 'y', Y, 'z', Z)
+    %   generates a boolean mask from the mesh represented by
+    %   faces/triangles F and vertices V using the grid vectors X, Y and Z.
+    %   The faces input F is an mx3 or 3xm array that specifies the
+    %   vertices to connect in the vertices array V. X, Y and Z represent
+    %   the grid vectors to use to create the meshgrid for voxel creation.
     %
-    %   Adapted from: Fast parallel surface and solid voxelization on GPUs,
-    %   Schwarz and Seidel, ACM SIGGRAPH ASIA 2010 PAPERS
-    %   DOI: 10.1145/1882261.1866201
+    %   Notes
+    %   -----
+    %   meshtovoxels tests for overlap between the voxels' and triangles'
+    %   axis-aligned bounding boxes (AABB). Only voxels within the bounding
+    %   box of the mesh are tested. Voxels that pass this test are filled.
+    %   Then, triangles' edges are tested for overlap with the remaining
+    %   voxels within the mesh bounding box that were not filled.
+    %   meshtovoxels voxelises a shell corresponding to the mesh; it does
+    %   not fill the inside of the mesh.
+    %
+    %   For more information, see <a href="matlab: 
+    %   web('https://developer.nvidia.com/content/basics-gpu-voxelization')
+    %   ">The Basics of GPU Voxelization</a>
+    %   and <a href="matlab:
+    %   web('https://dl.acm.org/citation.cfm?doid=1882261.1866201')
+    %   ">Fast parallel surface and solid voxelization on GPUs</a>
     %
     %   © 2016, Peter Beemiller (pbeemiller@gmail.com)
     %
-    %   See also SurfacesReader | isosurface | patch
+    %   See also isosurface | patch
     
     %% Parse the inputs.
     parser = inputParser;
@@ -90,7 +104,7 @@ function mask = meshtovoxels(varargin)
     %% Allocate the mask.
     mask = false(size(box));
     
-    %% Fill voxels that enclose a vertex.
+    %% Fill voxels with an AABB that overlaps the AABB of a triangle.
     for v = idxBox'
         % Calculate the voxel bounding box.
         p = [xGrid(v), yGrid(v), zGrid(v)];
@@ -155,7 +169,7 @@ function mask = meshtovoxels(varargin)
             (triMax(t, 2) - pV(:, 2)) .* (triMin(t, 2) - pV(:, 2) - dp(2)) < 0;
         
         yzOverlap = ...
-            (triMax(t, 3) - pV(:, 2)) .* (triMin(t, 2) - pV(:, 2) - dp(3)) < 0 & ...
+            (triMax(t, 2) - pV(:, 2)) .* (triMin(t, 2) - pV(:, 2) - dp(2)) < 0 & ...
             (triMax(t, 3) - pV(:, 3)) .* (triMin(t, 3) - pV(:, 3) - dp(3)) < 0;
         
         xzOverlap = ...
