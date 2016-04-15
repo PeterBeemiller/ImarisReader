@@ -15,6 +15,7 @@ Download the files, unzip, and then add the unzipped folder to the MATLAB path.
     fileObj = ImarisReader('file.ims');
 
 **Read image volumes.**
+
     Imaris stores the image data in the Data
     vol = fileObj.DataSet.GetDataVolume(cIdx, tIdx);
 
