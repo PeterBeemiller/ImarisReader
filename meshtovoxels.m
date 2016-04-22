@@ -36,7 +36,6 @@ function mask = meshtovoxels(varargin)
     
     %% Parse the inputs.
     parser = inputParser;
-    parser.KeepUnmatched = true;
     
     parser.addParameter('faces', [], ...
         @(f)ismatrix(f) && any(size(f) == 3))
