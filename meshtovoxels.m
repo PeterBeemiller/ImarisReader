@@ -102,22 +102,21 @@ function mask = meshtovoxels(varargin)
         p = [xGrid(idxBox(v)), yGrid(idxBox(v)), zGrid(idxBox(v))];
         pM = p + dp;
         
-        if ~any(...
-            (triMax(:, 1) - p(1)) .* (triMin(:, 1) - pM(1)) < 0 & ...
-            (triMax(:, 2) - p(2)) .* (triMin(:, 2) - pM(2)) < 0 & ...
-            (triMax(:, 3) - p(3)) .* (triMin(:, 3) - pM(3)) < 0)
-            
-            idxBox(v) = nan;
+        if ~any((triMax(:, 1) - p(1)) .* (triMin(:, 1) - pM(1)) < 0)
+            if ~any((triMax(:, 2) - p(2)) .* (triMin(:, 2) - pM(2)) < 0)
+                if ~any((triMax(:, 3) - p(3)) .* (triMin(:, 3) - pM(3)) < 0)
+                    idxBox(v) = nan;
+                end % if
+            end % if
         end % if
     end % for v
     
     idxBox(isnan(idxBox)) = [];
+    pV = [xGrid(idxBox), yGrid(idxBox), zGrid(idxBox)];
     
     %% For every triangle, test voxels for AABB overlap, then edge overlap.
     for t = 1:size(triangles, 1)
         %% Find voxels that overlap the triangle's 2D projections.
-        pV = [xGrid(idxBox), yGrid(idxBox), zGrid(idxBox)];
-        
         xyOverlap = ...
             (triMax(t, 1) - pV(:, 1)) .* (triMin(t, 1) - pV(:, 1) - dp(1)) < 0 & ...
             (triMax(t, 2) - pV(:, 2)) .* (triMin(t, 2) - pV(:, 2) - dp(2)) < 0;
@@ -153,7 +152,7 @@ function mask = meshtovoxels(varargin)
 
         %% Find voxels that overlap the triangle plane.
         % Get the voxel coordinates.
-        pV = [xGrid(idxOverlap), yGrid(idxOverlap), zGrid(idxOverlap)];
+        pVO = [xGrid(idxOverlap), yGrid(idxOverlap), zGrid(idxOverlap)];
         
         % Get the test points.
         c = dp;
@@ -163,7 +162,7 @@ function mask = meshtovoxels(varargin)
         d1 = sum(n.*(c - v1));
         d2 = sum(n.*((dp - c) - v1));
         
-        dnp = sum(repmat(n, [size(pV, 1), 1]).*pV, 2);
+        dnp = sum(repmat(n, [size(pVO, 1), 1]).*pVO, 2);
         
         isPlane = (dnp + d1).*(dnp + d2) <= 0;
         
@@ -217,6 +216,8 @@ function mask = meshtovoxels(varargin)
                 % Cover the voxel and remove it from the list of voxels to
                 % test.
                 mask(v) = true;
+                
+                pV(idxBox == v, :) = [];
                 idxBox(idxBox == v) = [];
             end % if
         end % for v
