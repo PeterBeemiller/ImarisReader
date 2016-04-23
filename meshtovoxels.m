@@ -102,13 +102,12 @@ function mask = meshtovoxels(varargin)
         p = [xGrid(idxBox(v)), yGrid(idxBox(v)), zGrid(idxBox(v))];
         pM = p + dp;
         
-        if ~any((triMax(:, 1) - p(1)) .* (triMin(:, 1) - pM(1)) < 0)
-            if ~any((triMax(:, 2) - p(2)) .* (triMin(:, 2) - pM(2)) < 0)
-                if ~any((triMax(:, 3) - p(3)) .* (triMin(:, 3) - pM(3)) < 0)
-                    idxBox(v) = nan;
-                end % if
-            end % if
-        end % if
+        if ~any((triMax(:, 1) - p(1)) .* (triMin(:, 1) - pM(1)) < 0) && ...
+           ~any((triMax(:, 2) - p(2)) .* (triMin(:, 2) - pM(2)) < 0) && ...
+           ~any((triMax(:, 3) - p(3)) .* (triMin(:, 3) - pM(3)) < 0)
+            
+            idxBox(v) = nan;
+       end % if
     end % for v
     
     idxBox(isnan(idxBox)) = [];
