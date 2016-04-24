@@ -144,34 +144,66 @@ classdef SurfacesReader < SurpassObjectReader
             %   indicates the zero-based index of the surface in the
             %   Surfaces object.
             
-            %% Get the Imaris dataset grid.
+            %% Get the Imaris dataset grid. 
             FID = H5I.get_file_id(obj.GID);
-            objDataSet = DatasetReader(H5G.open(FID, '/DataSet'));
+            infoGID = H5G.open(FID, '/DataSetInfo');
+            imageGID = H5G.open(infoGID, 'Image');
+            
+            % Read the xyz dimensions.
+            aID = H5A.open(imageGID, 'X');
+            xSize = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            aID = H5A.open(imageGID, 'Y');
+            ySize = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            aID = H5A.open(imageGID, 'Z');
+            zSize = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            % Read the extents.
+            aID = H5A.open(imageGID, 'ExtMin0');
+            xMin = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            aID = H5A.open(imageGID, 'ExtMax0');
+            xMax = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            aID = H5A.open(imageGID, 'ExtMin1');
+            yMin = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            aID = H5A.open(imageGID, 'ExtMax1');
+            yMax = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            aID = H5A.open(imageGID, 'ExtMin2');
+            zMin = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            aID = H5A.open(imageGID, 'ExtMax2');
+            zMax = str2double(H5A.read(aID));
+            H5A.close(aID)
+            
+            % Close the HDF5 objects.
+            H5G.close(imageGID);
+            H5G.close(infoGID);
             H5F.close(FID)
             
-            % Construct the grid vectors.
-            xgridvector = linspace(...
-                objDataSet.ExtendMinX, ...
-                objDataSet.ExtendMaxX, ...
-                objDataSet.SizeX + 1);
-            ygridvector = linspace(...
-                objDataSet.ExtendMinY, ...
-                objDataSet.ExtendMaxY, ...
-                objDataSet.SizeY + 1);
-            zgridvector = linspace(...
-                objDataSet.ExtendMinZ, ...
-                objDataSet.ExtendMaxZ, ...
-                objDataSet.SizeZ + 1);
+            %% Construct the grid vectors.
+            xgridvector = linspace(xMin, xMax, xSize + 1);
+            ygridvector = linspace(yMin, yMax, ySize + 1);
+            zgridvector = linspace(zMin, zMax, zSize + 1);
             
-            objDataSet.delete
-            
-            %% Call the meshtovoxels function.
+            %% Call the meshtovoxels function to create the mask.
             mask = meshtovoxels(...
                 'f', obj.GetTriangles(sIdx) + 1, ...
                 'v', obj.GetVertices(sIdx), ...
-                'x', xgridvector, ...
-                'y', ygridvector, ...
-                'z', zgridvector);
+                'x', xgridvector(1:end - 1), ...
+                'y', ygridvector(1:end - 1), ...
+                'z', zgridvector(1:end - 1));
         end % GetMask
         
         function normals = GetNormals(obj, sIdx)
