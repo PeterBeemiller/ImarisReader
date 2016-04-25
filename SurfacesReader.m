@@ -81,61 +81,6 @@ classdef SurfacesReader < SurpassObjectReader
             H5D.close(DID)
         end % GetIndicesT
         
-        function pos = GetPositions(obj)
-            % GetPositions Get the xyz positions of the surfaces
-            %
-            %   pos = obj.GetPositions returns an mx3 array of surface
-            %   centroids.
-            
-            %% If the object doesn't have calculated statistics, return.
-            if isempty(obj.GIDS8)
-                pos = [];
-                return
-            end % if
-            
-            %% Read the type data.
-            % Read the StatisticsType HDF5 data.
-            DID = H5D.open(obj.GIDS8, 'StatisticsType');
-            dataStatisticsType = H5D.read(DID);
-            H5D.close(DID)
-            
-            % Organize the stat names.
-            typeName = dataStatisticsType.Name';
-            typeName = num2cell(typeName, 2);
-            typeName = deblank(typeName);
-            
-            typeID = dataStatisticsType.ID;
-            
-            %% Mask for position data.
-            maskNamePos = ~cellfun(@isempty, ...
-                regexp(typeName, '^Position (X|Y|Z)$', 'Match', 'Once'));
-            
-            typeIDPos = typeID(maskNamePos);
-            
-            %% Read all the statistic values, then get the position data.
-            DID = H5D.open(obj.GIDS8, 'StatisticsValue');
-            dataStatisticsValue = H5D.read(DID);
-            H5D.close(DID)
-            
-            xMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(1);
-            xIDs = dataStatisticsValue.ID_Object(xMask);
-            [~, xOrder] = sort(xIDs);
-            xValues = dataStatisticsValue.Value(xMask);
-            pos(:, 1) = xValues(xOrder);
-            
-            yMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(2);
-            yIDs = dataStatisticsValue.ID_Object(yMask);
-            [~, yOrder] = sort(yIDs);
-            yValues = dataStatisticsValue.Value(yMask);
-            pos(:, 2) = yValues(yOrder);
-            
-            zMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(3);
-            zIDs = dataStatisticsValue.ID_Object(zMask);
-            [~, zOrder] = sort(zIDs);
-            zValues = dataStatisticsValue.Value(zMask);
-            pos(:, 3) = zValues(zOrder);
-        end % GetPositions
-        
         function mask = GetMask(obj, sIdx)
             % GetMask Get the voxel mask for a surface object
             %
@@ -254,6 +199,61 @@ classdef SurfacesReader < SurpassObjectReader
                 dataVertex.NormalY, ...
                 dataVertex.NormalZ];                
         end % GetNormals
+        
+        function pos = GetPositions(obj)
+            % GetPositions Get the xyz positions of the surfaces
+            %
+            %   pos = obj.GetPositions returns an mx3 array of surface
+            %   centroids.
+            
+            %% If the object doesn't have calculated statistics, return.
+            if isempty(obj.GIDS8)
+                pos = [];
+                return
+            end % if
+            
+            %% Read the type data.
+            % Read the StatisticsType HDF5 data.
+            DID = H5D.open(obj.GIDS8, 'StatisticsType');
+            dataStatisticsType = H5D.read(DID);
+            H5D.close(DID)
+            
+            % Organize the stat names.
+            typeName = dataStatisticsType.Name';
+            typeName = num2cell(typeName, 2);
+            typeName = deblank(typeName);
+            
+            typeID = dataStatisticsType.ID;
+            
+            %% Mask for position data.
+            maskNamePos = ~cellfun(@isempty, ...
+                regexp(typeName, '^Position (X|Y|Z)$', 'Match', 'Once'));
+            
+            typeIDPos = typeID(maskNamePos);
+            
+            %% Read all the statistic values, then get the position data.
+            DID = H5D.open(obj.GIDS8, 'StatisticsValue');
+            dataStatisticsValue = H5D.read(DID);
+            H5D.close(DID)
+            
+            xMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(1);
+            xIDs = dataStatisticsValue.ID_Object(xMask);
+            [~, xOrder] = sort(xIDs);
+            xValues = dataStatisticsValue.Value(xMask);
+            pos(:, 1) = xValues(xOrder);
+            
+            yMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(2);
+            yIDs = dataStatisticsValue.ID_Object(yMask);
+            [~, yOrder] = sort(yIDs);
+            yValues = dataStatisticsValue.Value(yMask);
+            pos(:, 2) = yValues(yOrder);
+            
+            zMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(3);
+            zIDs = dataStatisticsValue.ID_Object(zMask);
+            [~, zOrder] = sort(zIDs);
+            zValues = dataStatisticsValue.Value(zMask);
+            pos(:, 3) = zValues(zOrder);
+        end % GetPositions
         
         function triangles = GetTriangles(obj, sIdx)
             % GetTriangles Get the triangles for a surface object
