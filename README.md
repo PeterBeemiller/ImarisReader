@@ -1,5 +1,5 @@
 # ImarisReader
-Read image and segmentation object data stored in [Imaris](http://www.bitplane.com/) .ims files.
+ImarisReader is a set of MATLAB classes to read image and segmentation object data stored in [Imaris](http://www.bitplane.com/) .ims files.
 
 # Introduction
 Imaris .ims files are based on the HDF5 format. ImarisReader uses the HDF5 access functions built into MATLAB to read the data stored in ims files. ImarisReader encapsulates a set of MATLAB classes that facilitate access to the image data (DataSetReader) and segmented object data (CellsReader, FilamentsReader, SpotsReader and SurfacesReader).
