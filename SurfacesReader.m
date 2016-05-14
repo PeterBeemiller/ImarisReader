@@ -170,8 +170,8 @@ classdef SurfacesReader < SurpassObjectReader
             H5D.close(DID)
             
             %% Calculate the offset and the slab to read for the surface.
-            offset = sum(dataTimeNVerticesNTriangles(1:sIdx, 2), 1) + 1;
-            slab = double(dataTimeNVerticesNTriangles(sIdx + 1, 2)) - 1;
+            offset = sum(dataTimeNVerticesNTriangles(1:sIdx, 2), 1);
+            slab = double(dataTimeNVerticesNTriangles(sIdx + 1, 2));
             
             %% Read the Vertex dataset slab for the surface.
             DID = H5D.open(obj.GIDS8, 'Vertex');
