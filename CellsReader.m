@@ -121,7 +121,7 @@ classdef CellsReader < SurpassObjectReader
             %   reprented by the zero-based index cIdx.
             
             %% Read the Cell data in /Scene8. 
-            cellsGID = H5G.open(obj.GIDS8, '/Scene8/Content/Cells0/Cells');
+            cellsGID = H5G.open(obj.GIDS8, 'Cells');
             DID = H5D.open(cellsGID, 'Cell');
             dataCell = H5D.read(DID);
             H5D.close(DID)
