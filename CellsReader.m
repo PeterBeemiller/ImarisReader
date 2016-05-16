@@ -168,11 +168,9 @@ classdef CellsReader < SurpassObjectReader
             %   indices indicating the time index of each cell.
 
             %% Open the Time dataset.
-            cGID = H5G.open(obj.GID, 'Cells');
-            DID = H5D.open(cGID , 'TimeId');
+            DID = H5D.open(obj.GID , 'Cells/TimeId');
             dataTimeId = H5D.read(DID);
             H5D.close(DID)
-            H5G.close(cGID)
             
             %% Get the time indices from the data.
             idx = transpose(dataTimeId(1, :));
@@ -233,13 +231,12 @@ classdef CellsReader < SurpassObjectReader
             % nucleus.
             
             %% Open the Time dataset.
-            nucleusGID = H5G.open(obj.GID, 'Nucleus');
-            DID = H5D.open(nucleusGID , 'TimeId');
-            idx = transpose(H5D.read(DID));
+            DID = H5D.open(obj.GID, 'Nuclei/TimeId');
+            dataTimeId = H5D.read(DID);
+            H5D.close(DID)
             
             %% Close the HDF5 dataset object.
-            H5D.close(DID)
-            H5G.close(nucleusGID)
+            idx = transpose(dataTimeId(1, :));
         end % GetNucleiIndicesT
         
         function pos = GetNucleiPositions(obj)
