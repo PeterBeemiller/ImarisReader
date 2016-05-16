@@ -549,13 +549,13 @@ classdef CellsReader < SurpassObjectReader
             
             %% Calculate the offset and slab to read.
             rowIdx = dataVesicleCellOffset.ID == cIdx;
-            offset = double([dataVesicleCellOffset.IndexBegin(rowIdx) 0]);
-            
-            if isempty(dataVesicleCellOffset.IndexEnd(rowIdx))
+
+            if isempty(dataVesicleCellOffset.IndexBegin(rowIdx))
                 pos = [];
                 return
             end % if
-            
+
+            offset = double([dataVesicleCellOffset.IndexBegin(rowIdx) 0]);
             slab = double([...
                 dataVesicleCellOffset.IndexEnd(rowIdx) - ...
                 dataVesicleCellOffset.IndexBegin(rowIdx) ...
@@ -613,13 +613,13 @@ classdef CellsReader < SurpassObjectReader
             
             %% Calculate the offset and slab to read.
             rowIdx = dataVesicleCellOffset.ID == cIdx;
-            offset = double([dataVesicleCellOffset.IndexBegin(rowIdx), 3]);
 
             if isempty(dataVesicleCellOffset.IndexEnd(rowIdx))
                 radii = [];
                 return
             end % if
             
+            offset = double([dataVesicleCellOffset.IndexBegin(rowIdx), 3]);
             slab = double([...
                 dataVesicleCellOffset.IndexEnd(rowIdx) - ...
                 dataVesicleCellOffset.IndexBegin(rowIdx) ...
