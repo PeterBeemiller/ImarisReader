@@ -121,11 +121,9 @@ classdef CellsReader < SurpassObjectReader
             %   reprented by the zero-based index cIdx.
             
             %% Read the Cell data in /Scene8. 
-            cellsGID = H5G.open(obj.GIDS8, 'Cells');
-            DID = H5D.open(cellsGID, 'Cell');
+            DID = H5D.open(obj.GIDS8, 'Cells/Cell');
             dataCell = H5D.read(DID);
             H5D.close(DID)
-            H5G.close(cellsGID)
             
             %% Get the time index and mask ID for the cell.
             tIdx = dataCell.IDMaskImageTime(cIdx + 1);
@@ -200,18 +198,17 @@ classdef CellsReader < SurpassObjectReader
             dataLabel = H5D.read(DID);
             H5D.close(DID);
             
-            colorValues = single(dataLabel.Color(dataLabel.Label == mIdx));
+            colorValues = uint32(dataLabel.Color(dataLabel.Label == mIdx));
             
-            %% Create a DataSetReader object for the masks dataset group.
-            % Create a new GID to use for the Masks DataSet. Otherwise, the
-            % GID will get invalidated when the DataSetReader obj goes out
-            % of scope at the end of the method.
-            datasetGID = H5G.open(obj.GID, H5I.get_name(obj.MasksDataSetGID));
-            objMasksDataSet = DatasetReader(datasetGID);
+            %% Read the labels dataset data.
+            DID = H5D.open(obj.MasksDataSetGID, ...
+                ['ResolutionLevel 0/TimePoint ' ...
+                num2str(tIdx) '/Channel 0/Data']);
+            data = H5D.read(DID);
+            H5D.close(DID)
             
-            %% Get the mask for the idx.
-            labelValues = objMasksDataSet.GetDataVolume(0, tIdx);
-            mask = ismember(labelValues, colorValues);
+            %% Mask on the cell label values.
+            mask = ismember(data, colorValues);
         end % GetNucleus
             
         function ids = GetNucleiIDs(obj)
