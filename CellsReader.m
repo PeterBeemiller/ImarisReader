@@ -550,14 +550,28 @@ classdef CellsReader < SurpassObjectReader
             %% Calculate the offset and slab to read.
             rowIdx = dataVesicleCellOffset.ID == cIdx;
             offset = double([dataVesicleCellOffset.IndexBegin(rowIdx) 0]);
+            
+            if isempty(dataVesicleCellOffset.IndexEnd(rowIdx))
+                pos = [];
+                return
+            end % if
+            
             slab = double([...
                 dataVesicleCellOffset.IndexEnd(rowIdx) - ...
                 dataVesicleCellOffset.IndexBegin(rowIdx) ...
                 3]);
             
             %% Read the vesicle positions.
-            if H5L.exists(obj.GID, 'Vesicles', 'H5P_DEFAULT')
-                DID = H5D.open(obj.GID, 'Vesicles/CoordsXYZR');
+            if vIdx == 0
+                groupstring = 'Vesicles';
+                
+            else
+                groupstring = ['Vesicles' num2str(vIdx)];
+            
+            end %if
+            
+            if H5L.exists(obj.GID, groupstring, 'H5P_DEFAULT')
+                DID = H5D.open(obj.GID, [groupstring '/CoordsXYZR']);
                 MSID = H5S.create_simple(2, slab, []);
                 FSID = H5D.get_space(DID);
                 H5S.select_hyperslab(FSID, 'H5S_SELECT_SET', offset, [], [], slab);
@@ -600,14 +614,28 @@ classdef CellsReader < SurpassObjectReader
             %% Calculate the offset and slab to read.
             rowIdx = dataVesicleCellOffset.ID == cIdx;
             offset = double([dataVesicleCellOffset.IndexBegin(rowIdx), 3]);
+
+            if isempty(dataVesicleCellOffset.IndexEnd(rowIdx))
+                radii = [];
+                return
+            end % if
+            
             slab = double([...
                 dataVesicleCellOffset.IndexEnd(rowIdx) - ...
                 dataVesicleCellOffset.IndexBegin(rowIdx) ...
                 1]);
             
             %% Read the vesicle positions.
-            if H5L.exists(obj.GID, 'Vesicles', 'H5P_DEFAULT')
-                DID = H5D.open(obj.GID, 'Vesicles/CoordsXYZR');
+            if vIdx == 0
+                groupstring = 'Vesicles';
+                
+            else
+                groupstring = ['Vesicles' num2str(vIdx)];
+            
+            end %if
+            
+            if H5L.exists(obj.GID, groupstring, 'H5P_DEFAULT')
+                DID = H5D.open(obj.GID, [groupstring '/CoordsXYZR']);
                 MSID = H5S.create_simple(2, slab, []);
                 FSID = H5D.get_space(DID);
                 H5S.select_hyperslab(FSID, 'H5S_SELECT_SET', offset, [], [], slab);
@@ -646,17 +674,17 @@ classdef CellsReader < SurpassObjectReader
             
             %% Read the vesicles edges array.
             if vIdx == 0
-                DID = H5D.open(obj.GID, 'Vesicles/Edges');
-                dataEdges = transpose(H5D.read(DID));
-                H5D.close(DID)
+                groupString = 'Vesicles';
                 
             else
-                DID = H5D.open(obj.GID, ['Vesicles' num2str(vIdx) '/Edges']);
-                dataEdges = transpose(H5D.read(DID));
-                H5D.close(DID)
+                groupString = ['Vesicles' num2str(vIdx)];
                 
             end % if
             
+            DID = H5D.open(obj.GID, [groupString '/Edges']);
+            dataEdges = transpose(H5D.read(DID));
+            H5D.close(DID)
+
             %% Map the vesicle edges to the parent cells.
             GID = H5G.open(obj.GIDS8, ['Vesicles' num2str(vIdx)]);
 
