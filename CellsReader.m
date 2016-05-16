@@ -265,29 +265,36 @@ classdef CellsReader < SurpassObjectReader
             typeID = dataStatisticsType.ID;
             
             %% Mask for position data.
-            maskNamePos = ~cellfun(@isempty, ...
-                regexp(typeName, '^Nucleus Position (X|Y|Z)$', 'Match', 'Once'));
+            maskPosX = ~cellfun(@isempty, ...
+                regexp(typeName, '^Nucleus Position X$', 'Match', 'Once'));
+            idPosX = typeID(maskPosX);
             
-            typeIDPos = typeID(maskNamePos);
-            
+            maskPosY = ~cellfun(@isempty, ...
+                regexp(typeName, '^Nucleus Position Y$', 'Match', 'Once'));
+            idPosY = typeID(maskPosY);
+
+            maskPosZ = ~cellfun(@isempty, ...
+                regexp(typeName, '^Nucleus Position Z$', 'Match', 'Once'));
+            idPosZ = typeID(maskPosZ);
+
             %% Read all the statistic values, then get the position data.
             datasetID = H5D.open(obj.GIDS8, 'StatisticsValue');
             dataStatisticsValue = H5D.read(datasetID);
             H5D.close(datasetID)
             
-            xMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(1);
+            xMask = dataStatisticsValue.ID_StatisticsType == idPosX(1);
             xIDs = dataStatisticsValue.ID_Object(xMask);
             [~, xOrder] = sort(xIDs);
             xValues = dataStatisticsValue.Value(xMask);
             pos(:, 1) = xValues(xOrder);
             
-            yMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(2);
+            yMask = dataStatisticsValue.ID_StatisticsType == idPosY(2);
             yIDs = dataStatisticsValue.ID_Object(yMask);
             [~, yOrder] = sort(yIDs);
             yValues = dataStatisticsValue.Value(yMask);
             pos(:, 2) = yValues(yOrder);
             
-            zMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(3);
+            zMask = dataStatisticsValue.ID_StatisticsType == idPosZ(3);
             zIDs = dataStatisticsValue.ID_Object(zMask);
             [~, zOrder] = sort(zIDs);
             zValues = dataStatisticsValue.Value(zMask);
@@ -402,29 +409,36 @@ classdef CellsReader < SurpassObjectReader
             typeID = dataStatisticsType.ID;
             
             %% Mask for position data.
-            maskNamePos = ~cellfun(@isempty, ...
-                regexp(typeName, '^Cell Position (X|Y|Z)$', 'Match', 'Once'));
+            maskPosX = ~cellfun(@isempty, ...
+                regexp(typeName, '^Cell Position X$', 'Match', 'Once'));
+            idPosX = typeID(maskPosX);
             
-            typeIDPos = typeID(maskNamePos);
-            
+            maskPosY = ~cellfun(@isempty, ...
+                regexp(typeName, '^Cell Position Y$', 'Match', 'Once'));
+            idPosY = typeID(maskPosY);
+
+            maskPosZ = ~cellfun(@isempty, ...
+                regexp(typeName, '^Cell Position Z$', 'Match', 'Once'));
+            idPosZ = typeID(maskPosZ);
+
             %% Read all the statistic values, then get the position data.
             datasetID = H5D.open(obj.GIDS8, 'StatisticsValue');
             dataStatisticsValue = H5D.read(datasetID);
             H5D.close(datasetID)
             
-            xMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(1);
+            xMask = dataStatisticsValue.ID_StatisticsType == idPosX(1);
             xIDs = dataStatisticsValue.ID_Object(xMask);
             [~, xOrder] = sort(xIDs);
             xValues = dataStatisticsValue.Value(xMask);
             pos(:, 1) = xValues(xOrder);
             
-            yMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(2);
+            yMask = dataStatisticsValue.ID_StatisticsType == idPosY(1);
             yIDs = dataStatisticsValue.ID_Object(yMask);
             [~, yOrder] = sort(yIDs);
             yValues = dataStatisticsValue.Value(yMask);
             pos(:, 2) = yValues(yOrder);
             
-            zMask = dataStatisticsValue.ID_StatisticsType == typeIDPos(3);
+            zMask = dataStatisticsValue.ID_StatisticsType == idPosZ(1);
             zIDs = dataStatisticsValue.ID_Object(zMask);
             [~, zOrder] = sort(zIDs);
             zValues = dataStatisticsValue.Value(zMask);
