@@ -9,7 +9,7 @@ function mask = meshtovoxels(varargin)
     %   Description
     %   -----------
     %   mask = meshtovoxels('f', F, 'v', V, 'x', X, 'y', Y, 'z', Z)
-    %   generates a boolean mask from the mesh represented by
+    %   generates a Boolean mask from the mesh represented by
     %   faces/triangles F and vertices V using the grid vectors X, Y and Z.
     %   The faces input F is an mx3 or 3xm array that specifies the
     %   vertices to connect in the vertices array V. X, Y and Z represent
@@ -92,41 +92,25 @@ function mask = meshtovoxels(varargin)
     
     % Only test voxels in the bounding box.
     idxBox = find(box);
+    pV = [xGrid(idxBox), yGrid(idxBox), zGrid(idxBox)];
     
     %% Allocate the mask.
     mask = false(size(box));
-    
-    %% Discard voxels that do not overlap any triangle.
-    for v = 1:numel(idxBox)
-        % Calculate the voxel bounding box.
-        p = [xGrid(idxBox(v)), yGrid(idxBox(v)), zGrid(idxBox(v))];
-        pM = p + dp;
-        
-        if ~any((triMax(:, 1) - p(1)) .* (triMin(:, 1) - pM(1)) < 0) && ...
-           ~any((triMax(:, 2) - p(2)) .* (triMin(:, 2) - pM(2)) < 0) && ...
-           ~any((triMax(:, 3) - p(3)) .* (triMin(:, 3) - pM(3)) < 0)
-            
-            idxBox(v) = nan;
-       end % if
-    end % for v
-    
-    idxBox(isnan(idxBox)) = [];
-    pV = [xGrid(idxBox), yGrid(idxBox), zGrid(idxBox)];
     
     %% For every triangle, test voxels for AABB overlap, then edge overlap.
     for t = 1:size(triangles, 1)
         %% Find voxels that overlap the triangle's 2D projections.
         xyOverlap = ...
-            (triMax(t, 1) - pV(:, 1)) .* (triMin(t, 1) - pV(:, 1) - dp(1)) < 0 & ...
-            (triMax(t, 2) - pV(:, 2)) .* (triMin(t, 2) - pV(:, 2) - dp(2)) < 0;
+            (triMax(t, 1) - pV(:, 1)).*(triMin(t, 1) - pV(:, 1) - dp(1)) < 0 & ...
+            (triMax(t, 2) - pV(:, 2)).*(triMin(t, 2) - pV(:, 2) - dp(2)) < 0;
         
         yzOverlap = ...
-            (triMax(t, 2) - pV(:, 2)) .* (triMin(t, 2) - pV(:, 2) - dp(2)) < 0 & ...
-            (triMax(t, 3) - pV(:, 3)) .* (triMin(t, 3) - pV(:, 3) - dp(3)) < 0;
+            (triMax(t, 2) - pV(:, 2)).*(triMin(t, 2) - pV(:, 2) - dp(2)) < 0 & ...
+            (triMax(t, 3) - pV(:, 3)).*(triMin(t, 3) - pV(:, 3) - dp(3)) < 0;
         
         xzOverlap = ...
-            (triMax(t, 1) - pV(:, 1)) .* (triMin(t, 1) - pV(:, 1) - dp(1)) < 0 & ...
-            (triMax(t, 3) - pV(:, 3)) .* (triMin(t, 3) - pV(:, 3) - dp(3)) < 0;
+            (triMax(t, 1) - pV(:, 1)).*(triMin(t, 1) - pV(:, 1) - dp(1)) < 0 & ...
+            (triMax(t, 3) - pV(:, 3)).*(triMin(t, 3) - pV(:, 3) - dp(3)) < 0;
         
         idxOverlap = idxBox(xyOverlap & yzOverlap & xzOverlap);
         
@@ -171,7 +155,7 @@ function mask = meshtovoxels(varargin)
             continue
         end % if
         
-        %% Setup edge voxel intersection test.
+        %% Setup edge-voxel intersection test.
         % XY plane:
         xyN = sN(3)*[...
             -e1(2), e1(1);
